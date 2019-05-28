@@ -67,21 +67,37 @@ router.delete('/:id', async (req, res) => {
       try {
             const count = await db.remove(req.params.id);
             if (count > 0) {
-                  res.status(200).json({ message: 'The post has been removed' });
+                  res.status(200).json({ success: 'The post has been removed' });
             } else {
-                  res.status(404).json({ message: 'The post with the specified ID does not exist' });
+                  res.status(404).json({ errorMessage: 'The post with the specified ID does not exist' });
             }
       } catch (err) {
             console.log(err);
             res.status(500).json({
-                  error: "The post could not be removed"
+                  errorMessage: "The post could not be removed"
             })
       }
 });
 
 //edit specific post by id
-router.put('/:id', (req, res) => {
-
+router.put('/:id', async (req, res) => {
+      try {
+            const post = req.body;
+            const id = req.params.id;
+            if(!post.title || !post.contents) {
+                  res.status(400).json({ errorMessage: "So sorry, you must provide both the title AND contents." })
+            } else if (!id) {
+                  res.status(404).json({ errorMessage: 'The post with the specified ID does not exist' });
+                  
+            }
+            const updatedPost = await db.update(post, id);
+            res.status(200).json(updatedPost);
+      } catch (err) {
+            console.log(err);
+            res.status(500).json({
+                  error: "The post information could not be modified." 
+            })
+      }
 });
 
 
