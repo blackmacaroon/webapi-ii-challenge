@@ -4,7 +4,7 @@ const router = require('express').Router();
 
 
 //request handler functions
-//create new post
+//create new post 
 router.post('/', async (req, res) => {
       try {
             const posts = await db.insert(req.query);
@@ -49,6 +49,7 @@ router.get('/:id', async (req, res) => {
                   res.status(404).json({ message: "The post with the specified ID does not exist." });
             }
       } catch (err) {
+            console.log(err)
             res.status(500).json({
                   error: "The post information could not be retrieved." 
             })
@@ -62,8 +63,20 @@ router.get('/:id/comments', (req, res) => {
 });
 
 //delete specific post by id
-router.delete('/:id', (req, res) => {
-
+router.delete('/:id', async (req, res) => {
+      try {
+            const count = await db.remove(req.params.id);
+            if (count > 0) {
+                  res.status(200).json({ message: 'The post has been removed' });
+            } else {
+                  res.status(404).json({ message: 'The post with the specified ID does not exist' });
+            }
+      } catch (err) {
+            console.log(err);
+            res.status(500).json({
+                  error: "The post could not be removed"
+            })
+      }
 });
 
 //edit specific post by id
