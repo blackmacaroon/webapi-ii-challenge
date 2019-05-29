@@ -4,13 +4,14 @@ const router = require('express').Router();
 
 
 //request handler functions
-//create new post 
+//create new post - WORKING
 router.post('/', async (req, res) => {
+  
       try {
-            const posts = await db.insert(req.query);
             if(!req.body.title || !req.body.contents) {
                   res.status(400).json({ errorMessage: "So sorry, you must provide both the title AND contents." })
             } else {
+                  const posts = await db.insert(req.body);
                   res.status(200).json(posts);
             }
       } catch (err) {
@@ -21,19 +22,21 @@ router.post('/', async (req, res) => {
       }
 });
 
-//create new post comment
+//create new comment for specific post
 router.post('/:id/comments', async (req, res) => {
       try {
-            const id = req.params.id;
-            const text = req.params.text;
-            const comment = await db.insertComment();
-            if (!id) {
+            const post_id = req.params.id;
+            const text = req.body.text;
+            const comment = { text, post_id }
+            
+            if (!post_id) {
                   res.status(404).json({ message: "The post with the specified ID does not exist." });
             } else if (!text) {
-                  res.status(400).json({ rrorMessage: "Please provide text for the comment." });
+                  res.status(400).json({ errorMessage: "Please provide text for the comment." });
 
             } else {
-                  res.status(201).json(comment)
+                  const commentId = await db.insertComment(comment);
+                  res.status(201).json(commentId)
             }
       } catch (err) {
             res.status(500).json({ 
@@ -42,7 +45,7 @@ router.post('/:id/comments', async (req, res) => {
       }
 });
 
-//find posts
+//find posts - WORKING
 router.get('/', async (req, res) => {
       try {
             const posts= await db.find(req.query);
@@ -55,7 +58,7 @@ router.get('/', async (req, res) => {
       }
 });
 
-//find specific post by id
+//find specific post by id - WORKING
 router.get('/:id', async (req, res) => {
       try {
             const post = await db.findById(req.params.id);
@@ -73,7 +76,7 @@ router.get('/:id', async (req, res) => {
 
 });
 
-//find comments for specific post
+//find comments for specific post - WORKING
 router.get('/:id/comments', async (req, res) => {
       try {
             const id = req.params.id;
